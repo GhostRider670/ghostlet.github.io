@@ -1,1 +1,27 @@
-<!-- chat.html content will go here -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Ghostlet - Chat</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<div id="sidebar"></div>
+<div id="main-content">
+    <h1>Chat</h1>
+    <div id="chat-container" style="height:300px; overflow-y:auto; border:1px solid #f8c300; padding:5px;"></div>
+    <input type="text" id="chat-input" placeholder="Type a message...">
+    <button id="send-btn">Send</button>
+</div>
+<script type="module">
+import { setupSidebar, loadChat, sendMessage } from './assets/app.js';
+setupSidebar();
+loadChat();
+document.getElementById('send-btn').addEventListener('click', () => {
+    const input = document.getElementById('chat-input');
+    sendMessage(auth.currentUser.displayName || 'Anonymous', input.value);
+    input.value = '';
+});
+</script>
+</body>
+</html>
