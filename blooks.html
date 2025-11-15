@@ -1,1 +1,88 @@
-<!-- blooks.html content will go here -->
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Your Blooks</title>
+  <link rel="stylesheet" href="style.css">
+
+  <style>
+    body {
+      background: #0e0e11;
+      color: white;
+      text-align: center;
+      font-family: Arial, sans-serif;
+    }
+
+    #blooks-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 20px;
+    }
+
+    .blook-card {
+      background: #1b1b20;
+      padding: 20px;
+      margin: 12px;
+      border-radius: 15px;
+      width: 150px;
+      box-shadow: 0 0 10px #673cff;
+      font-size: 20px;
+      transition: 0.2s;
+    }
+
+    .blook-card:hover {
+      transform: scale(1.05);
+    }
+  </style>
+</head>
+
+<body>
+
+  <h1>Your Blooks</h1>
+
+  <div id="blooks-container"></div>
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyBLPQtq39tEcha66rw_ovWa5-I3Nl1qyos",
+  authDomain: "ghostlet-98357.firebaseapp.com",
+  projectId: "ghostlet-98357",
+  storageBucket: "ghostlet-98357.firebasestorage.app",
+  messagingSenderId: "843012219969",
+  appId: "1:843012219969:web:9e3037578726debf2212c0"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    firebase.auth().onAuthStateChanged(async user => {
+      if (!user) {
+        window.location = "login.html";
+        return;
+      }
+
+      const userRef = db.collection("users").doc(user.uid);
+      const snap = await userRef.get();
+      const data = snap.data();
+
+      const blooks = data.blooks || [];
+      const container = document.getElementById("blooks-container");
+
+      container.innerHTML = "";
+
+      blooks.forEach(blook => {
+        const div = document.createElement("div");
+        div.className = "blook-card";
+        div.innerText = blook;
+        container.appendChild(div);
+      });
+    });
+  </script>
+
+</body>
+</html>
