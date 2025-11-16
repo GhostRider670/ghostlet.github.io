@@ -1,160 +1,94 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Ghostlet — Stats</title>
 <style>
-  :root{--glow:#ff6aff}
-  body{margin:0;font-family:Segoe UI,Arial;background:linear-gradient(180deg,#0d0d1a,#1a1a2e);color:#eee;min-height:100vh}
-  .topbar{display:flex;justify-content:space-between;align-items:center;padding:12px 18px;background:#242444;box-shadow:0 0 12px var(--glow);border-bottom:2px solid var(--glow)}
-  .brand{color:var(--glow);font-weight:800;text-decoration:none}
-  .container{max-width:1100px;margin:18px auto;padding:0 18px}
-  .profile{display:flex;align-items:center;gap:16px;margin-top:20px}
-  .avatar{width:80px;height:80px;border-radius:50%;border:3px solid var(--glow);object-fit:cover}
-  .username{font-size:1.6rem;color:var(--glow);font-weight:800}
-  .badges{display:flex;gap:8px;margin-top:6px}
-  .badge{background:#ff6aff22;color:#ffb6ff;padding:4px 8px;border-radius:8px;font-weight:700;border:1px solid #ff6aff88}
-  .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-top:20px}
-  .stat-card{background:#2b2b44;padding:14px;border-radius:12px;text-align:center;border:2px solid rgba(255,106,255,0.06)}
-  .muted{color:#aaa}
-  .btn{background:var(--glow);border:none;color:#fff;padding:8px 12px;border-radius:8px;cursor:pointer}
-  input{padding:8px;border-radius:8px;border:2px solid #333;background:#111;color:#fff}
+:root{--glow:#ff6aff}
+body{margin:0;font-family:Segoe UI,Arial;background:linear-gradient(180deg,#0d0d1a,#1a1a2e);color:#eee}
+.topbar{display:flex;justify-content:space-between;align-items:center;padding:12px 18px;background:#242444;box-shadow:0 0 12px var(--glow);border-bottom:2px solid var(--glow)}
+.brand{color:var(--glow);font-weight:800;text-decoration:none}
+.container{max-width:800px;margin:12px auto;padding:0 18px}
+.profile{display:flex;align-items:center;margin-bottom:20px}
+.profile img{width:64px;height:64px;border-radius:50%;margin-right:12px;border:2px solid var(--glow);object-fit:cover}
+.badges{margin-left:8px;display:flex;gap:6px}
+.badge{background:#2b2b44;color:#fff;padding:4px 8px;border-radius:6px;font-size:0.8rem}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:16px;margin-top:12px}
+.stat-card{background:#2b2b44;padding:14px;border-radius:12px;text-align:center;border:2px solid rgba(255,106,255,0.06)}
+.stat-card h3{margin:6px 0;color:#ff6aff}
+button{background:var(--glow);border:none;color:#fff;padding:10px 14px;border-radius:8px;cursor:pointer}
 </style>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-<script>
-const firebaseConfig = {
-  apiKey: "AIzaSyBLPQtq39tEcha66rw_ovWa5-I3Nl1qyos",
-  authDomain: "ghostlet-98357.firebaseapp.com",
-  projectId: "ghostlet-98357",
-  storageBucket: "ghostlet-98357.appspot.com",
-  messagingSenderId: "843012219969",
-  appId: "1:843012219969:web:9e3037578726debf2212c0"
-};
-
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.firestore();
-</script>
+<script src="/firebase.js"></script>
 </head>
 <body>
-  <div class="topbar">
-    <a class="brand" href="index.html">Ghostlet</a>
+<div class="topbar">
+  <a class="brand" href="index.html">Ghostlet</a>
+  <div>
+    <button onclick="location.href='chat.html'">Chat</button>
+    <button onclick="location.href='market.html'">Market</button>
+    <button onclick="location.href='blooks.html'">Blooks</button>
+    <button onclick="location.href='settings.html'">Settings</button>
+    <button id="logoutBtn">Logout</button>
+  </div>
+</div>
+
+<div class="container">
+  <div class="profile">
+    <img id="profilePic" src="https://i.ibb.co/0FQG7kF/friendly-ghost.png" alt="Profile">
     <div>
-      <button class="btn" onclick="location.href='chat.html'">Chat</button>
-      <button class="btn" onclick="location.href='market.html'">Market</button>
-      <button class="btn" onclick="location.href='blooks.html'">Blooks</button>
-      <button class="btn" id="signOutBtn">Sign out</button>
+      <h2 id="username">Username</h2>
+      <div class="badges" id="badges"></div>
     </div>
   </div>
 
-  <div class="container">
-    <div id="profileWrap" class="profile">
-      <img id="avatar" class="avatar" src="https://i.ibb.co/0FQG7kF/friendly-ghost.png" alt="avatar">
-      <div>
-        <div style="display:flex;align-items:center;gap:12px">
-          <div class="username" id="displayName">Player</div>
-          <div id="badges" class="badges"></div>
-        </div>
-        <div class="muted" id="userIdArea"></div>
-        <div style="margin-top:8px">
-          <input id="editName" placeholder="Change display name" />
-          <button id="saveName" class="btn">Save</button>
-        </div>
-      </div>
+  <div class="stats-grid">
+    <div class="stat-card">
+      <h3 id="tokens">0</h3>
+      <p>Tokens</p>
     </div>
-
-    <div class="stats-grid">
-      <div class="stat-card">
-        <h3 style="margin:0;color:var(--glow)">Tokens</h3>
-        <div id="tokens" style="font-weight:700">0</div>
-      </div>
-      <div class="stat-card">
-        <h3 style="margin:0;color:var(--glow)">Packs Opened</h3>
-        <div id="packsOpened" style="font-weight:700">0</div>
-      </div>
-      <div class="stat-card">
-        <h3 style="margin:0;color:var(--glow)">Blooks Owned</h3>
-        <div id="blooksOwned" style="font-weight:700">0</div>
-      </div>
-      <div class="stat-card">
-        <h3 style="margin:0;color:var(--glow)">Messages Sent</h3>
-        <div id="messagesSent" style="font-weight:700">0</div>
-      </div>
+    <div class="stat-card">
+      <h3 id="packsOpened">0</h3>
+      <p>Packs Opened</p>
+    </div>
+    <div class="stat-card">
+      <h3 id="blooksOwned">0</h3>
+      <p>Blooks Owned</p>
+    </div>
+    <div class="stat-card">
+      <h3 id="messagesSent">0</h3>
+      <p>Messages Sent</p>
     </div>
   </div>
+</div>
 
 <script>
-  // ===== FIREBASE CONFIG - REPLACE WITH YOURS =====
-  const firebaseConfig = {
-    apiKey: "AIzaSyBLPQtq39tEcha66rw_ovWa5-I3Nl1qyos",
-  authDomain: "ghostlet-98357.firebaseapp.com",
-  projectId: "ghostlet-98357",
-  storageBucket: "ghostlet-98357.firebasestorage.app",
-  messagingSenderId: "843012219969",
-  appId: "1:843012219969:web:9e3037578726debf2212c0"
-  };
-  firebase.initializeApp(firebaseConfig);
-  const auth = firebase.auth();
-  const db = firebase.firestore();
+const auth = Ghostlet.auth();
+const db = Ghostlet.db();
 
-  const avatar = document.getElementById('avatar');
-  const displayNameEl = document.getElementById('displayName');
-  const badgesEl = document.getElementById('badges');
-  const userIdArea = document.getElementById('userIdArea');
-  const tokensEl = document.getElementById('tokens');
-  const packsEl = document.getElementById('packsOpened');
-  const blooksEl = document.getElementById('blooksOwned');
-  const messagesEl = document.getElementById('messagesSent');
-  const signOutBtn = document.getElementById('signOutBtn');
+auth.onAuthStateChanged(async user=>{
+  if(!user) return location.href='login.html';
+  const userRef = db.collection('users').doc(user.uid);
+  document.getElementById('logoutBtn').addEventListener('click',()=> auth.signOut());
 
-  signOutBtn.onclick = ()=> auth.signOut().then(()=> location.href='index.html');
-
-  // Edit display name UI
-  document.getElementById('saveName').addEventListener('click', async ()=>{
-    const val = document.getElementById('editName').value.trim();
-    if(!val) return alert('Enter a name');
-    const u = auth.currentUser;
-    if(!u) return;
-    try{
-      // update auth profile and user doc
-      await u.updateProfile({ displayName: val });
-      await db.collection('users').doc(u.uid).update({ username: val });
-      document.getElementById('editName').value = '';
-      alert('Saved');
-    }catch(e){ console.error(e); alert('Failed to save'); }
-  });
-
-  auth.onAuthStateChanged(user=>{
-    if(!user) return location.href='login.html';
-    const uid = user.uid;
-    userIdArea.textContent = 'User ID: ' + uid;
-
-    const userRef = db.collection('users').doc(uid);
-    // real-time updates
-    userRef.onSnapshot(doc=>{
-      if(!doc.exists) return;
-      const data = doc.data();
-      displayNameEl.textContent = data.username || user.displayName || 'Player';
-      avatar.src = data.profilePic || 'https://i.ibb.co/0FQG7kF/friendly-ghost.png';
-      badgesEl.innerHTML = '';
-      (data.badges || []).forEach(b=>{
-        const d = document.createElement('div');
-        d.className = 'badge';
-        d.textContent = b;
-        badgesEl.appendChild(d);
-      });
-      tokensEl.textContent = data.tokens ?? 0;
-      packsEl.textContent = data.packsOpened ?? 0;
-      messagesEl.textContent = data.messagesSent ?? 0;
-      // blooksOwned - count items in array
-      const owned = Array.isArray(data.blooks) ? data.blooks.length : 0;
-      blooksEl.textContent = owned;
+  userRef.onSnapshot(doc=>{
+    if(!doc.exists) return;
+    const data = doc.data();
+    document.getElementById('username').textContent = data.username || user.displayName || 'Player';
+    document.getElementById('profilePic').src = data.profilePic || 'https://i.ibb.co/0FQG7kF/friendly-ghost.png';
+    const badgesEl = document.getElementById('badges'); badgesEl.innerHTML='';
+    (data.badges || []).forEach(b=>{
+      const d=document.createElement('div'); d.className='badge'; d.textContent=b; badgesEl.appendChild(d);
     });
+    document.getElementById('tokens').textContent = data.tokens || 0;
+    document.getElementById('packsOpened').textContent = data.packsOpened || 0;
+    document.getElementById('messagesSent').textContent = data.messagesSent || 0;
+    document.getElementById('blooksOwned').textContent = Array.isArray(data.blooks) ? data.blooks.length : 0;
   });
+});
 </script>
 </body>
 </html>
