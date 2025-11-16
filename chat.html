@@ -1,27 +1,128 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Ghostlet - Chat</title>
-<link rel="stylesheet" href="assets/style.css">
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Ghostlet — Chat</title>
+<style>
+:root{--glow:#ff6aff}
+body{margin:0;font-family:Segoe UI,Arial;background:linear-gradient(180deg,#0d0d1a,#1a1a2e);color:#eee;display:flex;flex-direction:column;height:100vh}
+.topbar{display:flex;justify-content:space-between;align-items:center;padding:12px 18px;background:#242444;box-shadow:0 0 12px var(--glow);border-bottom:2px solid var(--glow)}
+.brand{color:var(--glow);font-weight:800;text-decoration:none}
+.container{max-width:1100px;margin:12px auto;padding:0 18px;flex:1;display:flex;flex-direction:column}
+#chatBox{background:#2b2b44;padding:18px;border-radius:12px;flex:1;overflow:auto;display:flex;flex-direction:column;gap:12px}
+.input-row{display:flex;gap:8px;margin-top:8px}
+input[type="text"]{flex:1;padding:10px;border-radius:8px;border:2px solid #333;background:#111;color:#fff}
+button{background:var(--glow);border:none;color:#fff;padding:8px 12px;border-radius:8px;cursor:pointer}
+.msg{display:flex;gap:12px}
+.avatar{width:42px;height:42px;border-radius:50%;background:#444;display:flex;align-items:center;justify-content:center;font-weight:700}
+.msg-body{flex:1}
+.msg-head{display:flex;align-items:center;gap:8px}
+.msg-username{font-weight:700;color:var(--glow)}
+.badge{background:#ff6aff22;color:#ffb6ff;padding:2px 6px;border-radius:6px;font-size:0.7rem;border:1px solid #ff6aff88}
+.msg-time{color:#aaa;font-size:0.75rem;margin-left:auto}
+.msg-text{margin-top:4px}
+</style>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="firebase.js"></script>
 </head>
 <body>
-<div id="sidebar"></div>
-<div id="main-content">
-    <h1>Chat</h1>
-    <div id="chat-container" style="height:300px; overflow-y:auto; border:1px solid #f8c300; padding:5px;"></div>
-    <input type="text" id="chat-input" placeholder="Type a message...">
-    <button id="send-btn">Send</button>
-</div>
-<script type="module">
-import { setupSidebar, loadChat, sendMessage } from './assets/app.js';
-setupSidebar();
-loadChat();
-document.getElementById('send-btn').addEventListener('click', () => {
-    const input = document.getElementById('chat-input');
-    sendMessage(auth.currentUser.displayName || 'Anonymous', input.value);
-    input.value = '';
+  <div class="topbar"><a class="brand" href="index.html">Ghostlet</a><div><button onclick="location.href='market.html'">Market</button><button onclick="location.href='stats.html'">Stats</button></div></div>
+
+  <div class="container">
+    <div id="chatBox"><div style="color:#aaa">Loading messages…</div></div>
+    <div class="input-row">
+      <input id="messageInput" placeholder="Type a message..." />
+      <button id="sendBtn">Send</button>
+    </div>
+  </div>
+
+<script>
+const auth = Ghostlet.auth();
+const db = Ghostlet.db();
+const chatBox = document.getElementById('chatBox');
+const input = document.getElementById('messageInput');
+const sendBtn = document.getElementById('sendBtn');
+
+function escapeHtml(s){ return String(s||'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;'); }
+
+auth.onAuthStateChanged(async user=>{
+  if(!user) return location.href='login.html';
+  // Listen for chat messages
+  db.collection('chat').orderBy('timestamp','asc').limit(400).onSnapshot(snap=>{
+    chatBox.innerHTML = '';
+    snap.forEach(doc=>{
+      const m = doc.data();
+      const el = makeMessageElement(m);
+      chatBox.appendChild(el);
+    });
+    chatBox.scrollTop = chatBox.scrollHeight;
+  });
 });
+
+// getBadge: lookup from user badges or a small map
+function getBadgeFromUser(userObj){
+  if(!userObj) return null;
+  const badges = userObj.badges || [];
+  if(badges.includes('OWNER')) return 'OWNER';
+  if(badges.includes('ADMIN')) return 'ADMIN';
+  if(badges.includes('MOD')) return 'MOD';
+  if(badges.includes('VIP')) return 'VIP';
+  return null;
+}
+
+function makeMessageElement(m){
+  const wrap = document.createElement('div'); wrap.className='msg';
+  const avatar = document.createElement('div'); avatar.className='avatar';
+  avatar.textContent = (m.username||'U')[0].toUpperCase();
+  wrap.appendChild(avatar);
+
+  const body = document.createElement('div'); body.className='msg-body';
+  const head = document.createElement('div'); head.className='msg-head';
+  const name = document.createElement('div'); name.className='msg-username'; name.textContent = m.username || 'Unknown';
+  head.appendChild(name);
+  if(m.badge) { const b = document.createElement('div'); b.className='badge'; b.textContent = m.badge; head.appendChild(b); }
+  const time = document.createElement('div'); time.className='msg-time'; time.textContent = (m.timestamp && m.timestamp.toDate) ? new Date(m.timestamp.toDate()).toLocaleString() : '';
+  head.appendChild(time);
+  body.appendChild(head);
+
+  const text = document.createElement('div'); text.className='msg-text'; text.innerHTML = escapeHtml(m.text);
+  body.appendChild(text);
+  wrap.appendChild(body);
+  return wrap;
+}
+
+// Send message
+sendBtn.addEventListener('click', sendMessage);
+input.addEventListener('keypress', e=> { if(e.key==='Enter') sendMessage(); });
+
+async function sendMessage(){
+  const text = input.value.trim();
+  if(!text) return;
+  const user = auth.currentUser;
+  if(!user) return alert('Login to send messages');
+  sendBtn.disabled = true;
+  // Grab user's profile info from users/{uid}
+  const uref = db.collection('users').doc(user.uid);
+  const snap = await uref.get();
+  const ud = snap.exists ? snap.data() : {};
+  const payload = {
+    uid: user.uid,
+    username: ud.username || user.displayName || 'Player',
+    text,
+    timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+    badge: (ud.badges && ud.badges.length>0) ? ud.badges[0] : null
+  };
+  try{
+    await db.collection('chat').add(payload);
+    // increment messagesSent on user's doc
+    uref.update({ messagesSent: firebase.firestore.FieldValue.increment(1) }).catch(()=>{});
+    input.value='';
+  }catch(e){ console.error(e); alert('Failed to send'); }
+  sendBtn.disabled = false;
+}
 </script>
 </body>
 </html>
