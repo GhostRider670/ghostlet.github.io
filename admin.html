@@ -15,20 +15,8 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-<script>
-const firebaseConfig = {
-  apiKey: "AIzaSyBLPQtq39tEcha66rw_ovWa5-I3Nl1qyos",
-  authDomain: "ghostlet-98357.firebaseapp.com",
-  projectId: "ghostlet-98357",
-  storageBucket: "ghostlet-98357.appspot.com",
-  messagingSenderId: "843012219969",
-  appId: "1:843012219969:web:9e3037578726debf2212c0"
-};
-
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.firestore();
-</script></head>
+<script src="/firebase.js"></script>
+</head>
 <body>
 <div class="topbar"><a class="brand" href="index.html">Ghostlet</a></div>
 <div class="container">
@@ -45,7 +33,7 @@ auth.onAuthStateChanged(async user=>{
   const data = doc.exists ? doc.data() : {};
   const badges = data.badges || [];
   if(!badges.includes('ADMIN') && !badges.includes('OWNER')){
-    document.getElementById('adminArea').innerHTML = '<div class="small">You are not an admin.</div>'; return;
+    document.getElementById('adminArea').innerHTML = '<div style="color:#aaa">You are not an admin.</div>'; return;
   }
   const area = document.getElementById('adminArea');
   area.innerHTML = `
