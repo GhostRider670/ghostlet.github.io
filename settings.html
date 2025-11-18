@@ -1,61 +1,212 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Ghostlet — Settings</title>
-<style>
-:root{--glow:#ff6aff} body{margin:0;font-family:Segoe UI,Arial;background:linear-gradient(180deg,#0d0d1a,#1a1a2e);color:#eee}
-.topbar{display:flex;justify-content:space-between;align-items:center;padding:12px 18px;background:#242444;box-shadow:0 0 12px var(--glow);border-bottom:2px solid var(--glow)}
-.brand{color:var(--glow);font-weight:800;text-decoration:none}
-.container{max-width:800px;margin:12px auto;padding:0 18px}
-.card{background:#2b2b44;padding:18px;border-radius:12px;margin-top:12px}
-input{padding:8px;border-radius:8px;border:2px solid #333;background:#111;color:#fff;width:100%}
-.btn{background:var(--glow);border:none;color:#fff;padding:10px 14px;border-radius:8px;cursor:pointer}
-.small{color:#aaa}
-</style>
 
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-<script src="/firebase.js"></script>
+<!-- Supabase -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+:root {
+  --glow:#ff6aff;
+}
+
+body {
+  margin:0;
+  font-family:Segoe UI,Arial;
+  background:linear-gradient(180deg,#0d0d1a,#1a1a2e);
+  color:white;
+  overflow-x:hidden;
+}
+
+/* ===== TOP BAR ===== */
+.topbar {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:10px 16px;
+  background:#242444;
+  box-shadow:0 0 10px var(--glow);
+  border-bottom:2px solid var(--glow);
+  position:sticky;
+  top:0;
+  z-index:100;
+}
+
+.brand {
+  color:var(--glow);
+  font-weight:800;
+  text-decoration:none;
+  font-size:1.2rem;
+}
+
+.top-buttons button {
+  background:var(--glow);
+  border:none;
+  color:white;
+  padding:6px 10px;
+  border-radius:8px;
+  cursor:pointer;
+  margin-left:4px;
+  font-size:0.85rem;
+}
+
+/* ===== CONTAINER ===== */
+.container {
+  max-width:460px;
+  margin:24px auto;
+  padding:20px;
+  background:#1a1a2e;
+  border-radius:12px;
+  box-shadow:0 0 14px rgba(0,0,0,0.5);
+}
+
+h1 {
+  text-align:center;
+  color:var(--glow);
+  margin-bottom:20px;
+}
+
+label {
+  display:block;
+  margin-top:12px;
+  font-weight:600;
+  color:#ccc;
+}
+
+input, select {
+  width:100%;
+  padding:10px;
+  margin-top:6px;
+  border-radius:8px;
+  border:none;
+  background:#2b2b44;
+  color:white;
+}
+
+button.saveBtn {
+  width:100%;
+  margin-top:20px;
+  padding:12px;
+  border:none;
+  border-radius:8px;
+  background:var(--glow);
+  color:white;
+  cursor:pointer;
+  font-size:1rem;
+  font-weight:700;
+}
+
+.pfp-preview {
+  width:90px;
+  height:90px;
+  border-radius:12px;
+  object-fit:cover;
+  margin-top:12px;
+  border:3px solid var(--glow);
+}
+
+</style>
 </head>
 <body>
-<div class="topbar"><a class="brand" href="index.html">Ghostlet</a><div><button onclick="location.href='market.html'">Market</button></div></div>
-<div class="container">
-  <h1 style="color:var(--glow)">Settings</h1>
-  <div class="card">
-    <label>Display name</label><br>
-    <input id="username" placeholder="Your display name"><br>
-    <label style="margin-top:8px">Profile picture URL</label><br>
-    <input id="profilePic" placeholder="https://example.com/image.png"><br>
-    <button id="saveBtn" class="btn">Save</button>
-    <div class="small" style="margin-top:8px">Your name and picture are saved to your account.</div>
+
+<!-- TOP NAV BAR -->
+<div class="topbar">
+  <a class="brand" href="home.html">Ghostlet</a>
+  <div class="top-buttons">
+    <button onclick="location.href='home.html'">Home</button>
+    <button onclick="location.href='stats.html'">Stats</button>
+    <button onclick="location.href='market.html'">Market</button>
+    <button onclick="location.href='blooks.html'">Blooks</button>
+    <button onclick="location.href='chat.html'">Chat</button>
+    <button onclick="logout()">Logout</button>
   </div>
 </div>
 
+<div class="container">
+  <h1>Settings</h1>
+
+  <label>Username</label>
+  <input id="usernameInput" placeholder="New username">
+
+  <label>Theme Color (hex)</label>
+  <input id="colorInput" type="color" value="#ff6aff">
+
+  <label>Profile Picture (image URL)</label>
+  <input id="pfpInput" placeholder="https://example.com/pfp.png">
+  <img id="pfpPreview" class="pfp-preview" src="" alt="pfp preview">
+
+  <button class="saveBtn" onclick="saveSettings()">Save Settings</button>
+</div>
+
 <script>
-const auth = Ghostlet.auth();
-const db = Ghostlet.db();
-auth.onAuthStateChanged(user=>{
-  if(!user) return location.href='login.html';
-  const r = db.collection('users').doc(user.uid);
-  r.get().then(snap=>{
-    if(!snap.exists) return;
-    const d = snap.data();
-    document.getElementById('username').value = d.username || user.displayName || '';
-    document.getElementById('profilePic').value = d.profilePic || '';
-  });
-  document.getElementById('saveBtn').addEventListener('click', async ()=>{
-    const name = document.getElementById('username').value.trim();
-    const pic = document.getElementById('profilePic').value.trim();
-    if(!name) return alert('Enter a name');
-    try{
-      await db.collection('users').doc(user.uid).update({ username:name, profilePic: pic || "https://i.ibb.co/0FQG7kF/friendly-ghost.png" });
-      await user.updateProfile({ displayName: name, photoURL: pic || null });
-      alert('Saved');
-    }catch(e){ console.error(e); alert('Failed to save'); }
-  });
-});
+// Initialize Supabase
+const supabaseClient = supabase.createClient(
+  "https://bjgxufxgpgojkwqbdyqp.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJqZ3h1ZnhncGdvamt3cWJkeXFwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMzOTk1NjMsImV4cCI6MjA3ODk3NTU2M30.BRyjh8E2WK1KTquDhzfBtAmcBuxhZ4jRsZQgN_5s9rg"
+);
+
+let userId = null;
+
+/* LOAD USER INFO */
+async function loadProfile() {
+  const { data: { user } } = await supabaseClient.auth.getUser();
+  if (!user) return location.href="login.html";
+  userId = user.id;
+
+  const { data, error } = await supabaseClient
+    .from("profiles")
+    .select("*")
+    .eq("id", userId)
+    .single();
+
+  if (data) {
+    document.getElementById("usernameInput").value = data.username ?? "";
+    document.getElementById("colorInput").value = data.theme_color ?? "#ff6aff";
+    document.documentElement.style.setProperty("--glow", data.theme_color);
+
+    if (data.pfp_url) {
+      document.getElementById("pfpPreview").src = data.pfp_url;
+      document.getElementById("pfpInput").value = data.pfp_url;
+    }
+  }
+}
+
+loadProfile();
+
+/* SETTINGS SAVER */
+async function saveSettings() {
+  const newUsername = document.getElementById("usernameInput").value;
+  const newColor = document.getElementById("colorInput").value;
+  const newPfp = document.getElementById("pfpInput").value;
+
+  document.documentElement.style.setProperty("--glow", newColor);
+  document.getElementById("pfpPreview").src = newPfp;
+
+  const { error } = await supabaseClient
+    .from("profiles")
+    .update({
+      username: newUsername,
+      theme_color: newColor,
+      pfp_url: newPfp
+    })
+    .eq("id", userId);
+
+  if (error) {
+    alert("Failed to save settings.");
+  } else {
+    alert("Settings updated!");
+  }
+}
+
+/* LOGOUT */
+async function logout() {
+  await supabaseClient.auth.signOut();
+  location.href = "login.html";
+}
 </script>
+
 </body>
 </html>
