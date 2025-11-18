@@ -1,74 +1,66 @@
 <!doctype html>
-<html lang="en">
+<html>
 <head>
-<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Ghostlet — Register</title>
-<style>
-:root{--glow:#ff6aff} body{margin:0;font-family:Segoe UI,Arial;background:linear-gradient(180deg,#0d0d1a,#1a1a2e);color:#eee;display:flex;align-items:center;justify-content:center;height:100vh}
-.card{background:#2b2b44;padding:28px;border-radius:12px;max-width:420px;width:92%;box-shadow:0 8px 40px rgba(0,0,0,0.6)}
-input{width:100%;padding:10px;margin-top:10px;border-radius:8px;border:2px solid #333;background:#111;color:#fff}
-.btn{background:var(--glow);border:none;color:#fff;padding:10px 14px;border-radius:8px;cursor:pointer;margin-top:12px;font-weight:700;width:100%}
-.small{color:#aaa;margin-top:8px;text-align:center}
-</style>
+  <meta charset="utf-8" />
+  <title>Ghostlet — Register</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const SUPABASE_URL = "https://bjgxufxgpgojkwqbdyqp.supabase.co";
+    const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJqZ3h1ZnhncGdvamt3cWJkeXFwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMzOTk1NjMsImV4cCI6MjA3ODk3NTU2M30.BRyjh8E2WK1KTquDhzfBtAmcBuxhZ4jRsZQgN_5s9rg";
+    window.supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+  </script>
 
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-<script>
-const firebaseConfig = {
-  apiKey: "AIzaSyBLPQtq39tEcha66rw_ovWa5-I3Nl1qyos",
-  authDomain: "ghostlet-98357.firebaseapp.com",
-  projectId: "ghostlet-98357",
-  storageBucket: "ghostlet-98357.firebasestorage.app",
-  messagingSenderId: "843012219969",
-  appId: "1:843012219969:web:9e3037578726debf2212c0"
-};
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.firestore();
-</script>
+  <style>
+    html,body{height:100%;margin:0;padding:0;background:#050505;color:#fff;font-family:Segoe UI,Arial}
+    .center{max-width:720px;margin:48px auto;text-align:center;padding:28px;background:#0e0e0e;border-radius:18px;box-shadow:0 0 40px rgba(0,255,255,0.06)}
+    h1{color:#00fef0;margin-bottom:6px}
+    input{width:90%;padding:12px;border-radius:10px;border:none;background:#222;color:#fff;margin:8px 0}
+    button{background:#00fef0;border:none;color:#000;padding:12px 18px;border-radius:12px;cursor:pointer;font-weight:700;width:92%}
+    a{color:#00fef0}
+  </style>
 </head>
 <body>
-  <div class="card">
-    <h2 style="color:var(--glow);margin:0 0 6px 0">Create Account</h2>
-    <input id="username" placeholder="Display name" />
+  <div class="center">
+    <h1>Ghostlet — Register</h1>
+    <input id="username" placeholder="Display username" />
     <input id="email" placeholder="Email" type="email" />
     <input id="password" placeholder="Password" type="password" />
-    <button id="registerBtn" class="btn">Create Account</button>
-    <div class="small">Already have an account? <a style="color:var(--glow)" href="login.html">Login</a></div>
+    <button id="registerBtn">Create account</button>
+    <p style="margin-top:12px">Have an account? <a href="login.html">Login</a></p>
+    <p id="msg" style="color:#ff8080"></p>
   </div>
 
-<script>
-const auth = Ghostlet.auth();
-const db = Ghostlet.db();
+  <script>
+    const msg = document.getElementById('msg');
+    document.getElementById('registerBtn').onclick = async () => {
+      msg.textContent = '';
+      const username = document.getElementById('username').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      if (!username || !email || !password) { msg.textContent = 'Fill every field.'; return; }
 
-document.getElementById('registerBtn').addEventListener('click', async ()=>{
-  const username = document.getElementById('username').value.trim();
-  const email = document.getElementById('email').value.trim();
-  const password = document.getElementById('password').value;
-  if(!username || !email || !password) return alert('Fill all fields');
+      const { data, error } = await supabase.auth.signUp({ email, password });
+      if (error) { msg.textContent = 'Register failed: ' + error.message; return; }
 
-  try{
-    const cred = await auth.createUserWithEmailAndPassword(email, password);
-    const userRef = db.collection('users').doc(cred.user.uid);
-    await userRef.set({
-      username,
-      email,
-      tokens: 0,
-      blooks: [],
-      profilePic: "https://i.ibb.co/0FQG7kF/friendly-ghost.png",
-      packsOpened: 0,
-      messagesSent: 0,
-      badges: []
-    });
-    await cred.user.updateProfile({ displayName: username });
-    alert('Account created');
-    location.href = 'index.html';
-  }catch(err){
-    console.error(err);
-    alert('Error: ' + (err.message||err));
-  }
-});
-</script>
+      // create profile row (id must equal auth user id)
+      try {
+        await supabase.from('profiles').insert([{
+          id: data.user.id,
+          username,
+          theme_color: '#00fef0',
+          packs_opened: 0,
+          blooks_owned: 0,
+          messages_sent: 0,
+          badges: []
+        }]);
+      } catch (e) {
+        console.warn('profile insert error', e);
+      }
+
+      // auto sign-in may happen; redirect to index
+      location.href = 'index.html';
+    };
+  </script>
 </body>
 </html>
