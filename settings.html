@@ -3,102 +3,119 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Ghostlet — Settings</title>
+<title>Settings</title>
+
+<!-- Main Theme From Stats Page -->
+<style>
+  :root {
+    --glow: #ff6aff;
+    --bgTop: #242444;
+    --bgMain: #0d0d1a;
+    --textLight: #eee;
+    --textDim: #bbb;
+  }
+
+  body {
+    margin: 0;
+    font-family: Segoe UI, Arial, sans-serif;
+    background: linear-gradient(180deg, var(--bgMain), #1a1a2e);
+    color: var(--textLight);
+    overflow-x: hidden;
+  }
+
+  /* Top Bar */
+  .topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--bgTop);
+    padding: 10px 16px;
+    border-bottom: 2px solid var(--glow);
+    box-shadow: 0 0 10px var(--glow);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .brand {
+    font-weight: 800;
+    color: var(--glow);
+    text-decoration: none;
+  }
+
+  .navBtns button {
+    background: var(--glow);
+    border: none;
+    padding: 6px 10px;
+    border-radius: 8px;
+    color: white;
+    cursor: pointer;
+    margin-left: 4px;
+    font-size: 0.85rem;
+  }
+
+  /* Page Container */
+  .container {
+    max-width: 480px;
+    margin: 20px auto;
+    padding: 0 20px;
+  }
+
+  h1 {
+    text-align: center;
+    color: var(--glow);
+  }
+
+  label {
+    display: block;
+    margin-top: 15px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--textDim);
+  }
+
+  input {
+    width: 100%;
+    padding: 10px;
+    border-radius: 10px;
+    border: none;
+    margin-top: 6px;
+    background: #2b2b44;
+    color: var(--textLight);
+    font-size: 1rem;
+  }
+
+  button.saveBtn {
+    width: 100%;
+    background: var(--glow);
+    border: none;
+    padding: 12px;
+    margin-top: 20px;
+    border-radius: 10px;
+    color: #fff;
+    cursor: pointer;
+    font-size: 1rem;
+  }
+
+  .status {
+    text-align: center;
+    margin-top: 10px;
+    font-size: 0.9rem;
+  }
+</style>
 
 <!-- Supabase -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-<style>
-:root {
-  --glow:#ff6aff;
-}
-
-body {
-  margin:0;
-  font-family:Segoe UI,Arial;
-  background:linear-gradient(180deg,#0d0d1a,#1a1a2e);
-  color:white;
-  overflow-x:hidden;
-}
-
-/* ===== TOP BAR ===== */
-.topbar{width:100%;background:#070707;padding:12px 20px;border-bottom:3px solid #00fef0;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap}
-  .topbar-left{color:#00fef0;font-weight:800;font-size:20px}
-.brand {
-  color:var(--glow);
-  font-weight:800;
-  text-decoration:none;
-  font-size:1.2rem;
-}
-
-/* ===== CONTAINER ===== */
-.container {
-  max-width:460px;
-  margin:24px auto;
-  padding:20px;
-  background:#1a1a2e;
-  border-radius:12px;
-  box-shadow:0 0 14px rgba(0,0,0,0.5);
-}
-
-h1 {
-  text-align:center;
-  color:var(--glow);
-  margin-bottom:20px;
-}
-
-label {
-  display:block;
-  margin-top:12px;
-  font-weight:600;
-  color:#ccc;
-}
-
-input, select {
-  width:100%;
-  padding:10px;
-  margin-top:6px;
-  border-radius:8px;
-  border:none;
-  background:#2b2b44;
-  color:white;
-}
-
-button.saveBtn {
-  width:100%;
-  margin-top:20px;
-  padding:12px;
-  border:none;
-  border-radius:8px;
-  background:var(--glow);
-  color:white;
-  cursor:pointer;
-  font-size:1rem;
-  font-weight:700;
-}
-
-.pfp-preview {
-  width:90px;
-  height:90px;
-  border-radius:12px;
-  object-fit:cover;
-  margin-top:12px;
-  border:3px solid var(--glow);
-}
-
-</style>
 </head>
 <body>
 
-<!-- TOP NAV BAR -->
+<!-- TOP BAR -->
 <div class="topbar">
-  <a class="brand" href="home.html">Ghostlet</a>
-  <div class="top-buttons">
-    <button onclick="location.href='home.html'">Home</button>
-    <button onclick="location.href='stats.html'">Stats</button>
-    <button onclick="location.href='market.html'">Market</button>
-    <button onclick="location.href='blooks.html'">Blooks</button>
-    <button onclick="location.href='chat.html'">Chat</button>
+  <a class="brand" href="stats.html">Ghostlet</a>
+  <div class="navBtns">
+    <button onclick="window.location='stats.html'">Stats</button>
+    <button onclick="window.location='blooks.html'">Blooks</button>
+    <button onclick="window.location='settings.html'">Settings</button>
     <button onclick="logout()">Logout</button>
   </div>
 </div>
@@ -106,81 +123,66 @@ button.saveBtn {
 <div class="container">
   <h1>Settings</h1>
 
-  <label>Username</label>
-  <input id="usernameInput" placeholder="New username">
+  <label>Change Username</label>
+  <input id="usernameInput" type="text" placeholder="New Username">
 
-  <label>Profile Picture (image URL)</label>
-  <input id="pfpInput" placeholder="https://example.com/pfp.png">
-  <img id="pfpPreview" class="pfp-preview" src="" alt="pfp preview">
+  <button class="saveBtn" onclick="saveSettings()">Save</button>
 
-  <button class="saveBtn" onclick="saveSettings()">Save Settings</button>
+  <div class="status" id="statusMessage"></div>
 </div>
 
 <script>
-// Initialize Supabase
-const supabaseClient = supabase.createClient(
-  "https://bjgxufxgpgojkwqbdyqp.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJqZ3h1ZnhncGdvamt3cWJkeXFwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMzOTk1NjMsImV4cCI6MjA3ODk3NTU2M30.BRyjh8E2WK1KTquDhzfBtAmcBuxhZ4jRsZQgN_5s9rg"
-);
+  const supabase = supabase.createClient(
+    "https://bjgxufxgpgojkwqbdyqp.supabase.co",
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJqZ3h1ZnhncGdvamt3cWJkeXFwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMzOTk1NjMsImV4cCI6MjA3ODk3NTU2M30.BRyjh8E2WK1KTquDhzfBtAmcBuxhZ4jRsZQgN_5s9rg"
+  );
 
-let userId = null;
+  // Load current username
+  document.addEventListener("DOMContentLoaded", async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return window.location = "login.html";
 
-/* LOAD USER INFO */
-async function loadProfile() {
-  const { data: { user } } = await supabaseClient.auth.getUser();
-  if (!user) return location.href="login.html";
-  userId = user.id;
+    const { data } = await supabase
+      .from("profiles")
+      .select("username")
+      .eq("id", user.id)
+      .single();
 
-  const { data, error } = await supabaseClient
-    .from("profiles")
-    .select("*")
-    .eq("id", userId)
-    .single();
+    if (data?.username) {
+      document.getElementById("usernameInput").value = data.username;
+    }
+  });
 
-  if (data) {
-    document.getElementById("usernameInput").value = data.username ?? "";
-    document.getElementById("colorInput").value = data.theme_color ?? "#ff6aff";
-    document.documentElement.style.setProperty("--glow", data.theme_color);
+  // Save username
+  async function saveSettings() {
+    const newName = document.getElementById("usernameInput").value.trim();
+    const status = document.getElementById("statusMessage");
 
-    if (data.pfp_url) {
-      document.getElementById("pfpPreview").src = data.pfp_url;
-      document.getElementById("pfpInput").value = data.pfp_url;
+    if (!newName) {
+      status.textContent = "Username cannot be empty.";
+      return;
+    }
+
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const { error } = await supabase
+      .from("profiles")
+      .update({ username: newName })
+      .eq("id", user.id);
+
+    if (error) {
+      status.textContent = "Error saving settings.";
+    } else {
+      status.textContent = "Saved!";
     }
   }
-}
 
-loadProfile();
-
-/* SETTINGS SAVER */
-async function saveSettings() {
-  const newUsername = document.getElementById("usernameInput").value;
-  const newColor = document.getElementById("colorInput").value;
-  const newPfp = document.getElementById("pfpInput").value;
-
-  document.documentElement.style.setProperty("--glow", newColor);
-  document.getElementById("pfpPreview").src = newPfp;
-
-  const { error } = await supabaseClient
-    .from("profiles")
-    .update({
-      username: newUsername,
-      theme_color: newColor,
-      pfp_url: newPfp
-    })
-    .eq("id", userId);
-
-  if (error) {
-    alert("Failed to save settings.");
-  } else {
-    alert("Settings updated!");
+  // Logout
+  async function logout() {
+    await supabase.auth.signOut();
+    window.location = "login.html";
   }
-}
-
-/* LOGOUT */
-async function logout() {
-  await supabaseClient.auth.signOut();
-  location.href = "login.html";
-}
 </script>
 
 </body>
